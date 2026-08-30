@@ -1,0 +1,40 @@
+[package]
+name = "lenso-business-approval-postgres-plugin"
+version = "0.1.0"
+description = "PostgreSQL-backed durable human business-decision Plugin for Lenso applications."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[package.metadata.lenso]
+plugin-id = "lenso.business-approval.postgres"
+root-slot = "business-approval"
+
+[features]
+default = []
+postgres-acceptance = []
+
+[dependencies]
+lenso.workspace = true
+lenso-capability-business-approval = { version = "0.1.0", path = "../lenso-capability-business-approval" }
+lenso-capability-secrets.workspace = true
+lenso-kernel.workspace = true
+lenso-native-adapter.workspace = true
+lenso-postgres-kit.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+time.workspace = true
+zeroize.workspace = true
+
+[dev-dependencies]
+futures.workspace = true
+lenso-app-plan.workspace = true
+tokio.workspace = true
+url = "2.5"
+
+[lints]
+workspace = true

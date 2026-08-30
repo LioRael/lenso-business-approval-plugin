@@ -1,0 +1,43 @@
+{
+  "id": "lenso.business-approval@1",
+  "version": "1.0.0",
+  "portable": true,
+  "cross_lane_transfer": true,
+  "operations": [
+    {
+      "name": "request",
+      "interaction": "request",
+      "request_schema": "schemas/request-request.schema.json",
+      "response_schema": "schemas/request-response.schema.json",
+      "domain_error_schema": "schemas/request-error.schema.json"
+    },
+    {
+      "name": "decide",
+      "interaction": "request",
+      "request_schema": "schemas/decide-request.schema.json",
+      "response_schema": "schemas/transition-response.schema.json",
+      "domain_error_schema": "schemas/decide-error.schema.json"
+    },
+    {
+      "name": "cancel",
+      "interaction": "request",
+      "request_schema": "schemas/cancel-request.schema.json",
+      "response_schema": "schemas/transition-response.schema.json",
+      "domain_error_schema": "schemas/cancel-error.schema.json"
+    },
+    {
+      "name": "read",
+      "interaction": "request",
+      "request_schema": "schemas/read-request.schema.json",
+      "response_schema": "schemas/read-response.schema.json",
+      "domain_error_schema": "schemas/read-error.schema.json"
+    },
+    {
+      "name": "expire",
+      "interaction": "request",
+      "request_schema": "schemas/expire-request.schema.json",
+      "response_schema": "schemas/transition-response.schema.json",
+      "domain_error_schema": "schemas/expire-error.schema.json"
+    }
+  ]
+}

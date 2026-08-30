@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["created", "request_id", "status", "revision"],
+  "properties": {
+    "created": {"type": "boolean"},
+    "request_id": {"type": "string"},
+    "status": {"type": "string", "enum": ["pending", "approved", "rejected", "cancelled", "expired"]},
+    "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"}
+  }
+}
