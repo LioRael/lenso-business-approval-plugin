@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lenso Business Approval PostgreSQL Plugin configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "database_url_secret",
+    "requester_instances",
+    "decider_instances",
+    "expiration_executor_instances"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,62}$"
+    },
+    "database_url_secret": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9._:-]+(?:/[A-Za-z0-9._:-]+)*$"
+    },
+    "requester_instances": {"$ref": "#/$defs/callers"},
+    "decider_instances": {"$ref": "#/$defs/callers"},
+    "expiration_executor_instances": {"$ref": "#/$defs/callers"}
+  },
+  "$defs": {
+    "callers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[A-Za-z0-9._:-]+$"
+      }
+    }
+  }
+}

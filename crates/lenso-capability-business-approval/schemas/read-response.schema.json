@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "idempotency_key",
+    "approval_kind",
+    "subject",
+    "requester_instance",
+    "requested_by",
+    "status",
+    "revision",
+    "requested_at",
+    "expires_at",
+    "terminal_caller_instance",
+    "terminal_actor",
+    "evidence_ref",
+    "reason",
+    "terminal_at"
+  ],
+  "properties": {
+    "request_id": {"type": "string"},
+    "idempotency_key": {"type": "string"},
+    "approval_kind": {"type": "string"},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}
+    },
+    "requester_instance": {"type": "string"},
+    "requested_by": {"type": "string"},
+    "status": {"type": "string", "enum": ["pending", "approved", "rejected", "cancelled", "expired"]},
+    "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+    "requested_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "terminal_caller_instance": {"type": ["string", "null"]},
+    "terminal_actor": {"type": ["string", "null"]},
+    "evidence_ref": {"type": ["string", "null"]},
+    "reason": {"type": ["string", "null"]},
+    "terminal_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

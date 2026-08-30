@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "status",
+    "revision",
+    "terminal_caller_instance",
+    "terminal_actor",
+    "evidence_ref",
+    "reason",
+    "terminal_at"
+  ],
+  "properties": {
+    "request_id": {"type": "string"},
+    "status": {"type": "string", "enum": ["approved", "rejected", "cancelled", "expired"]},
+    "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+    "terminal_caller_instance": {"type": "string"},
+    "terminal_actor": {"type": ["string", "null"]},
+    "evidence_ref": {"type": ["string", "null"]},
+    "reason": {"type": ["string", "null"]},
+    "terminal_at": {"type": "string", "format": "date-time"}
+  }
+}
