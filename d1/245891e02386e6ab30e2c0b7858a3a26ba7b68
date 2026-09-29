@@ -1,0 +1,51 @@
+.github/workflows/ci.yml
+  s_7d146975368699::t_4cd2dbb0b0db54 5-6,38
+Cargo.lock
+  s_7d146975368699::t_2cf8e2f4b4973e 642,644,656,658,701,703,715,717,727,729,735-745,748,750,757,764,766,778,780,784,786,788,795,797
+Cargo.toml
+  s_7d146975368699::t_103c3bce3cd3bc 17-24
+crates/lenso-business-approval-postgres-plugin/migrations/002_bind_immutable_intent.sql
+  s_f4202e28c6b5b1::t_df460f7e9f4d57 1
+crates/lenso-business-approval-postgres-plugin/src/lib.rs
+  s_7d146975368699::t_468d1ade740e0b 197-201,216,473,494-500,761
+crates/lenso-business-approval-postgres-plugin/src/postgres_tests.rs
+  s_7d146975368699::t_73ee5665a1b382 19,66,73,113-127
+crates/lenso-business-approval-postgres-plugin/src/schema.rs
+  s_7d146975368699::t_cb8934bca95edb 3-14
+crates/lenso-business-approval-postgres-plugin/src/storage.rs
+  s_f4202e28c6b5b1::t_004f5e04e9687a 49,63,118,129,144,176,207,241,278,306,330,393
+crates/lenso-capability-business-approval/capability.json
+  s_f4202e28c6b5b1::t_86f0f8e9beaa37 3
+crates/lenso-capability-business-approval/schemas/read-response.schema.json
+  s_f4202e28c6b5b1::t_e5e43f9345763b 23-31,35-113
+crates/lenso-capability-business-approval/schemas/request-request.schema.json
+  s_f4202e28c6b5b1::t_c722261b631696 41-44,60-70
+crates/lenso-capability-business-approval/src/generated.rs
+  s_f4202e28c6b5b1::t_40e7bbb61840c7 6,8-9,14-15,19,23-32,36-39,253,267-269,305-328,361,372-374,386-400,1062-1156,1283,1296-1302,1381-1388,1418-1425
+docs/management-security.md
+  s_f4202e28c6b5b1::t_99d4308c69a029 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d1245891e02386e6ab30e2c0b7858a3a26ba7b68",
+  "prompts": {},
+  "sessions": {
+    "s_7d146975368699": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c54a-381f-7362-9b4d-95aea89e2437",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "LioRael <leo@lenso.dev>"
+    },
+    "s_f4202e28c6b5b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ee9e-623b-7d12-a648-d8b462390eec",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "LioRael <leo@lenso.dev>"
+    }
+  }
+}
