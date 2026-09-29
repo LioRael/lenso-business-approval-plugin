@@ -17,6 +17,7 @@ default = []
 postgres-acceptance = []
 
 [dependencies]
+lenso-auth-sdk = { version = "0.2.4", git = "https://github.com/LioRael/lenso-auth-plugin", rev = "be751f795b254ab228ae4fb2fde7cf79a934d09b" }
 lenso.workspace = true
 lenso-capability-business-approval = { version = "0.1.0", path = "../lenso-capability-business-approval" }
 lenso-capability-secrets.workspace = true

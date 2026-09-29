@@ -31,6 +31,14 @@ Caller allowlists accept a legacy single Instance key or the canonical
 Instance grants no authority to the package name or another Instance. Empty
 segments and paths with more than two segments are rejected by configuration.
 
+An admitted decider cannot forward a scoped delegation or a non-user sealed
+assertion to `decide`. The owner applies the Auth SDK's denial-only context
+reader before any write. Malformed sealed assertions also deny. This reader
+does not verify a signature, credential liveness or HTTP identity, and never
+grants permission. The remote human guard retains those checks. An absent
+assertion preserves the existing explicitly trusted local decider boundary;
+the configured decider still attests the opaque human actor reference.
+
 ## Verification
 
 ```sh

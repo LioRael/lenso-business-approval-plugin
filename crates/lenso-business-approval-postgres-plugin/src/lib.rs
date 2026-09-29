@@ -237,6 +237,9 @@ impl PostgresBusinessApprovalPlugin {
         let caller = self
             .authorized_caller(&context, BusinessApprovalConfig::can_decide)
             .ok_or_else(|| PluginError::domain(DecideError::Forbidden))?;
+        if lenso_auth_sdk::delegation::denies_human_context(&context) {
+            return Err(PluginError::domain(DecideError::Forbidden));
+        }
         if !valid_request_id(&request.request_id)
             || !valid_reference(&request.decided_by)
             || !valid_reference(&request.evidence_ref)
