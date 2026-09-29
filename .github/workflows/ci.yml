@@ -1,9 +1,9 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [main]
+    branches: ['candidate/**']
+  workflow_dispatch:
 
 permissions: {}
 
@@ -35,7 +35,7 @@ jobs:
       - name: Install exact contract projection checker
         run: >-
           cargo install --locked
-          --version '=0.6.7'
+          --version '=0.10.0'
           lenso-contract-codegen
       - run: lenso-contract-codegen workspace check --manifest-path Cargo.toml
       - run: ./scripts/check-repository-boundary.sh

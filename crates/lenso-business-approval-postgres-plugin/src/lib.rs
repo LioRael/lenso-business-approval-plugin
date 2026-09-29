@@ -194,6 +194,11 @@ impl PostgresBusinessApprovalPlugin {
             || !valid_kind(&request.approval_kind)
             || !valid_kind(&request.subject.kind)
             || !valid_reference(&request.subject.id)
+            || request
+                .intent_digest
+                .as_deref()
+                .is_some_and(|digest| !valid_intent_digest(digest))
+            || (request.subject.kind == "management-operation" && request.intent_digest.is_none())
             || expires_at <= requested_at
         {
             return Err(PluginError::domain(RequestError::InvalidRequest));
@@ -208,6 +213,7 @@ impl PostgresBusinessApprovalPlugin {
                 approval_kind: request.approval_kind,
                 subject_kind: request.subject.kind,
                 subject_id: request.subject.id,
+                intent_digest: request.intent_digest,
                 requested_at,
                 expires_at,
             },
@@ -464,6 +470,7 @@ fn read_response(approval: StoredApproval) -> PluginResult<ReadResponse, ReadErr
             kind: approval.subject_kind,
             id: approval.subject_id,
         },
+        intent_digest: approval.intent_digest,
         requester_instance: approval.requester_instance,
         requested_by: approval.requested_by,
         status: match approval.status {
@@ -482,6 +489,13 @@ fn read_response(approval: StoredApproval) -> PluginResult<ReadResponse, ReadErr
         reason: approval.reason,
         terminal_at: approval.terminal_at.map(format_timestamp).transpose()?,
     })
+}
+
+fn valid_intent_digest(digest: &str) -> bool {
+    digest.len() == 64
+        && digest
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
 }
 
 fn request_status(status: ApprovalStatus) -> RequestResponseStatus {
@@ -744,6 +758,7 @@ mod tests {
         let result = futures::executor::block_on(plugin().request(
             context("expense-api-shadow"),
             RequestRequest {
+                intent_digest: None,
                 request_id: "apr_42".to_owned(),
                 idempotency_key: "expense_42".to_owned(),
                 requested_by: "usr_requester".to_owned(),

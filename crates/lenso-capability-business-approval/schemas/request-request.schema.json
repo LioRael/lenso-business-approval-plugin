@@ -38,7 +38,10 @@
     "subject": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "id"],
+      "required": [
+        "kind",
+        "id"
+      ],
       "properties": {
         "kind": {
           "type": "string",
@@ -54,6 +57,16 @@
         }
       }
     },
-    "expires_at": {"type": "string", "format": "date-time"}
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "intent_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "minLength": 64,
+      "maxLength": 64,
+      "x-lenso-sensitive": true
+    }
   }
 }

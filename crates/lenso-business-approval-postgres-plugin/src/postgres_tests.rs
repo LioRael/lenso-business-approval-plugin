@@ -16,6 +16,7 @@ fn intent(
     expires_at: OffsetDateTime,
 ) -> RequestIntent {
     RequestIntent {
+        intent_digest: None,
         request_id: request_id.to_owned(),
         requester_instance: requester_instance.to_owned(),
         idempotency_key: idempotency_key.to_owned(),
@@ -62,13 +63,14 @@ async fn durable_approval_preserves_idempotency_and_single_terminal_evidence() {
     .unwrap();
     let now = OffsetDateTime::now_utc().replace_nanosecond(0).unwrap();
 
-    let approval_intent = intent(
+    let mut approval_intent = intent(
         "apr_decision",
         "expense-api",
         "expense-42",
         now,
         now + Duration::hours(1),
     );
+    approval_intent.intent_digest = Some("a".repeat(64));
     let created = storage::request(&postgres, &approval_intent)
         .await
         .unwrap()
@@ -106,6 +108,21 @@ async fn durable_approval_preserves_idempotency_and_single_terminal_evidence() {
     assert_eq!(
         storage::request(&postgres, &conflicting).await.unwrap(),
         Err(DomainFailure::IdempotencyConflict)
+    );
+
+    let mut changed_digest = approval_intent.clone();
+    changed_digest.intent_digest = Some("b".repeat(64));
+    assert_eq!(
+        storage::request(&postgres, &changed_digest).await.unwrap(),
+        Err(DomainFailure::IdempotencyConflict)
+    );
+    assert_eq!(
+        storage::read(&postgres, "apr_decision", Some("expense-api"))
+            .await
+            .unwrap()
+            .unwrap()
+            .intent_digest,
+        Some("a".repeat(64))
     );
 
     let decided = storage::decide(

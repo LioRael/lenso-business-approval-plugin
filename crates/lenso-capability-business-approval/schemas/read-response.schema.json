@@ -20,25 +20,96 @@
     "terminal_at"
   ],
   "properties": {
-    "request_id": {"type": "string"},
-    "idempotency_key": {"type": "string"},
-    "approval_kind": {"type": "string"},
+    "request_id": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string"
+    },
+    "approval_kind": {
+      "type": "string"
+    },
     "subject": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "id"],
-      "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
     },
-    "requester_instance": {"type": "string"},
-    "requested_by": {"type": "string"},
-    "status": {"type": "string", "enum": ["pending", "approved", "rejected", "cancelled", "expired"]},
-    "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"},
-    "requested_at": {"type": "string", "format": "date-time"},
-    "expires_at": {"type": "string", "format": "date-time"},
-    "terminal_caller_instance": {"type": ["string", "null"]},
-    "terminal_actor": {"type": ["string", "null"]},
-    "evidence_ref": {"type": ["string", "null"]},
-    "reason": {"type": ["string", "null"]},
-    "terminal_at": {"type": ["string", "null"], "format": "date-time"}
+    "requester_instance": {
+      "type": "string"
+    },
+    "requested_by": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled",
+        "expired"
+      ]
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "terminal_caller_instance": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "terminal_actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "terminal_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "intent_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "minLength": 64,
+      "maxLength": 64,
+      "x-lenso-sensitive": true
+    }
   }
 }

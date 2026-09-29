@@ -3,25 +3,40 @@ use std::{fmt, rc::Rc};
 use futures::future::LocalBoxFuture;
 use lenso_kernel::{InvocationContext, NativeRequestEndpoint, NativeRequestFuture, NativeRequestHandle, PluginDependencies, RequestCapability, RuntimeFailure};
 
-use lenso_plugin_authoring::{BoundCapabilityClient, CapabilityClient, CapabilityClientMany};
+use lenso_plugin_authoring::{BoundCapabilityClient, CapabilityClient, CapabilityClientMany, CapabilityReference};
 pub const CAPABILITY_ID: &str = "lenso.business-approval@1";
-pub const DESCRIPTOR_VERSION: &str = "1.0.0";
+pub const DESCRIPTOR_VERSION: &str = "1.1.0";
+pub const DESCRIPTOR_DIGEST: &str = "sha256:80dc3becb07dacec4d90584b13843a92cefabe8ee4be3d8cb11b5fc983fdb8f1";
 pub const PORTABLE: bool = true;
 pub const CROSS_LANE_TRANSFER: bool = true;
 pub const BUSINESS_APPROVAL_CAPABILITY_ID: &str = CAPABILITY_ID;
 pub const BUSINESS_APPROVAL_DESCRIPTOR_VERSION: &str = DESCRIPTOR_VERSION;
+pub const BUSINESS_APPROVAL_DESCRIPTOR_DIGEST: &str = DESCRIPTOR_DIGEST;
+pub const BUSINESS_APPROVAL_CONTRACT: CapabilityReference<BusinessApprovalClient> = CapabilityReference::new(CAPABILITY_ID, DESCRIPTOR_VERSION, DESCRIPTOR_DIGEST);
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! __lenso_provided_business_approval { () => { "{\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.0.0\",\"operations\":[\"cancel\",\"decide\",\"expire\",\"read\",\"request\"],\"operation_kinds\":{},\"default_admission\":{\"queue_capacity\":0,\"max_concurrency\":1},\"operation_admissions\":{},\"event_admission\":null,\"cross_lane_transfer\":true}" }; }
+macro_rules! __lenso_provided_business_approval { () => { "{\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.1.0\",\"operations\":[\"cancel\",\"decide\",\"expire\",\"read\",\"request\"],\"operation_kinds\":{},\"default_admission\":{\"queue_capacity\":0,\"max_concurrency\":1},\"operation_admissions\":{},\"event_admission\":null,\"cross_lane_transfer\":true}" }; }
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! __lenso_required_business_approval_client { () => { "{\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.0.0\",\"cardinality\":\"one\"}" }; }
+macro_rules! __lenso_required_business_approval_client {
+    () => { "{\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.1.0\",\"cardinality\":\"one\"}" };
+    ($requirement_id:literal) => { concat!("{\"requirement_id\":", stringify!($requirement_id), ",\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.1.0\",\"cardinality\":\"one\"}") };
+}
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! __lenso_required_many_business_approval_client { () => { "{\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.0.0\",\"cardinality\":\"many\"}" }; }
+macro_rules! __lenso_required_optional_business_approval_client {
+    ($requirement_id:literal) => { concat!("{\"requirement_id\":", stringify!($requirement_id), ",\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.1.0\",\"cardinality\":\"optional\"}") };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __lenso_required_many_business_approval_client {
+    () => { "{\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.1.0\",\"cardinality\":\"many\"}" };
+    ($requirement_id:literal) => { concat!("{\"requirement_id\":", stringify!($requirement_id), ",\"capability_id\":\"lenso.business-approval@1\",\"descriptor_version\":\"1.1.0\",\"cardinality\":\"many\"}") };
+}
 
 pub const CANCEL_OPERATION: &str = "cancel";
 pub const DECIDE_OPERATION: &str = "decide";
@@ -235,7 +250,7 @@ pub struct ReadRequest {
     pub request_id: String,
 }
 
-#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ReadResponse {
     #[serde(rename = "approval_kind")]
     #[serde(deserialize_with = "lenso_contract_runtime::serde::deserialize_required")]
@@ -249,6 +264,9 @@ pub struct ReadResponse {
     #[serde(rename = "idempotency_key")]
     #[serde(deserialize_with = "lenso_contract_runtime::serde::deserialize_required")]
     pub idempotency_key: String,
+    #[serde(rename = "intent_digest")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub intent_digest: Option<String>,
     #[serde(rename = "reason")]
     #[serde(deserialize_with = "lenso_contract_runtime::serde::deserialize_required")]
     pub reason: Option<String>,
@@ -284,6 +302,30 @@ pub struct ReadResponse {
     pub terminal_caller_instance: Option<String>,
 }
 
+impl fmt::Debug for ReadResponse {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ReadResponse")
+            .field("approval_kind", &self.approval_kind)
+            .field("evidence_ref", &self.evidence_ref)
+            .field("expires_at", &self.expires_at)
+            .field("idempotency_key", &self.idempotency_key)
+            .field("intent_digest", &"<redacted>")
+            .field("reason", &self.reason)
+            .field("request_id", &self.request_id)
+            .field("requested_at", &self.requested_at)
+            .field("requested_by", &self.requested_by)
+            .field("requester_instance", &self.requester_instance)
+            .field("revision", &self.revision)
+            .field("status", &self.status)
+            .field("subject", &self.subject)
+            .field("terminal_actor", &self.terminal_actor)
+            .field("terminal_at", &self.terminal_at)
+            .field("terminal_caller_instance", &self.terminal_caller_instance)
+            .finish()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ReadResponseStatus {
     #[serde(rename = "pending")]
@@ -316,7 +358,7 @@ pub enum ReadError {
     Unknown(UnknownDomainError),
 }
 
-#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct RequestRequest {
     #[serde(rename = "approval_kind")]
     #[serde(deserialize_with = "lenso_contract_runtime::serde::deserialize_required")]
@@ -327,6 +369,9 @@ pub struct RequestRequest {
     #[serde(rename = "idempotency_key")]
     #[serde(deserialize_with = "lenso_contract_runtime::serde::deserialize_required")]
     pub idempotency_key: String,
+    #[serde(rename = "intent_digest")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub intent_digest: Option<String>,
     #[serde(rename = "request_id")]
     #[serde(deserialize_with = "lenso_contract_runtime::serde::deserialize_required")]
     pub request_id: String,
@@ -336,6 +381,21 @@ pub struct RequestRequest {
     #[serde(rename = "subject")]
     #[serde(deserialize_with = "lenso_contract_runtime::serde::deserialize_required")]
     pub subject: RequestRequestSubject,
+}
+
+impl fmt::Debug for RequestRequest {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("RequestRequest")
+            .field("approval_kind", &self.approval_kind)
+            .field("expires_at", &self.expires_at)
+            .field("idempotency_key", &self.idempotency_key)
+            .field("intent_digest", &"<redacted>")
+            .field("request_id", &self.request_id)
+            .field("requested_by", &self.requested_by)
+            .field("subject", &self.subject)
+            .finish()
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -999,6 +1059,101 @@ macro_rules! __lenso_native_lower_business_approval {
     };
 }
 
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __lenso_native_lower_object_business_approval {
+    ($object:ty, $plugin:ty, $support:path) => {
+        use $support as __LensoNativeSupportBusinessApproval;
+        impl $crate::BusinessApprovalProvider for $object {
+        fn cancel(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::CancelRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalCancel> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                let result = <$plugin>::cancel(plugin.as_ref(), context, request).await;
+                $crate::__LensoIntoBusinessApprovalCancelResult::__lenso_into_result(result)
+            })
+        }
+        fn decide(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::DecideRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalDecide> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                let result = <$plugin>::decide(plugin.as_ref(), context, request).await;
+                $crate::__LensoIntoBusinessApprovalDecideResult::__lenso_into_result(result)
+            })
+        }
+        fn expire(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::ExpireRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalExpire> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                let result = <$plugin>::expire(plugin.as_ref(), context, request).await;
+                $crate::__LensoIntoBusinessApprovalExpireResult::__lenso_into_result(result)
+            })
+        }
+        fn read(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::ReadRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalRead> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                let result = <$plugin>::read(plugin.as_ref(), context, request).await;
+                $crate::__LensoIntoBusinessApprovalReadResult::__lenso_into_result(result)
+            })
+        }
+        fn request(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::RequestRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalRequest> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                let result = <$plugin>::request(plugin.as_ref(), context, request).await;
+                $crate::__LensoIntoBusinessApprovalRequestResult::__lenso_into_result(result)
+            })
+        }
+        }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __lenso_native_lower_trait_object_business_approval {
+    ($object:ty, $plugin:ty, $support:path) => {
+        use $support as __LensoNativeSupportBusinessApproval;
+        impl $crate::BusinessApprovalProvider for $object {
+        fn cancel(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::CancelRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalCancel> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                <$plugin as $crate::BusinessApprovalProvider>::cancel(plugin.as_ref(), context, request).await
+            })
+        }
+        fn decide(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::DecideRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalDecide> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                <$plugin as $crate::BusinessApprovalProvider>::decide(plugin.as_ref(), context, request).await
+            })
+        }
+        fn expire(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::ExpireRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalExpire> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                <$plugin as $crate::BusinessApprovalProvider>::expire(plugin.as_ref(), context, request).await
+            })
+        }
+        fn read(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::ReadRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalRead> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                <$plugin as $crate::BusinessApprovalProvider>::read(plugin.as_ref(), context, request).await
+            })
+        }
+        fn request(&self, context: __LensoNativeSupportBusinessApproval::InvocationContext, request: $crate::RequestRequest) -> __LensoNativeSupportBusinessApproval::NativeRequestFuture<$crate::BusinessApprovalRequest> {
+            let object = self.clone();
+            ::std::boxed::Box::pin(async move {
+                let plugin = object.get()?;
+                <$plugin as $crate::BusinessApprovalProvider>::request(plugin.as_ref(), context, request).await
+            })
+        }
+        }
+    };
+}
+
 #[derive(Debug)]
 struct BusinessApprovalRequestEndpoint { provider: Rc<dyn BusinessApprovalProvider> }
 
@@ -1125,7 +1280,7 @@ macro_rules! __lenso_native_provide_business_approval {
     }};
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BusinessApprovalClient {
     cancel: NativeRequestHandle<BusinessApprovalCancel>,
     decide: NativeRequestHandle<BusinessApprovalDecide>,
@@ -1136,6 +1291,13 @@ pub struct BusinessApprovalClient {
 impl BusinessApprovalClient {
     pub fn from_dependencies(dependencies: &PluginDependencies) -> Result<Self, RuntimeFailure> {
         <Self as CapabilityClient>::from_dependencies(dependencies)
+    }
+
+    pub fn from_requirement(
+        dependencies: &PluginDependencies,
+        requirement_id: &str,
+    ) -> Result<Self, RuntimeFailure> {
+        <Self as CapabilityClient>::from_requirement(dependencies, requirement_id)
     }
 
     pub async fn cancel(&self, request: CancelRequest) -> Result<CancelResponse, BusinessApprovalCancelInvocationError> {
@@ -1216,6 +1378,14 @@ impl CapabilityClient for BusinessApprovalClient {
         })
     }
 
+    fn from_requirement(
+        dependencies: &PluginDependencies,
+        requirement_id: &str,
+    ) -> Result<Self, RuntimeFailure> {
+        let dependencies = dependencies.requirement(requirement_id)?;
+        Self::from_dependencies(&dependencies)
+    }
+
     fn already_connected() -> RuntimeFailure {
         RuntimeFailure::PluginFailure {
             detail: format!("Capability Port {CAPABILITY_ID} was connected more than once"),
@@ -1244,6 +1414,14 @@ impl CapabilityClientMany for BusinessApprovalClient {
                 ))
             })
             .collect()
+    }
+
+    fn many_from_requirement(
+        dependencies: &PluginDependencies,
+        requirement_id: &str,
+    ) -> Result<Vec<BoundCapabilityClient<Self>>, RuntimeFailure> {
+        let dependencies = dependencies.requirement(requirement_id)?;
+        Self::many_from_dependencies(&dependencies)
     }
 }
 

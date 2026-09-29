@@ -46,6 +46,7 @@ pub(crate) struct RequestIntent {
     pub(crate) approval_kind: String,
     pub(crate) subject_kind: String,
     pub(crate) subject_id: String,
+    pub(crate) intent_digest: Option<String>,
     pub(crate) requested_at: OffsetDateTime,
     pub(crate) expires_at: OffsetDateTime,
 }
@@ -59,6 +60,7 @@ pub(crate) struct StoredApproval {
     pub(crate) approval_kind: String,
     pub(crate) subject_kind: String,
     pub(crate) subject_id: String,
+    pub(crate) intent_digest: Option<String>,
     pub(crate) status: ApprovalStatus,
     pub(crate) revision: i64,
     pub(crate) requested_at: OffsetDateTime,
@@ -113,7 +115,7 @@ pub(crate) async fn request(
         .await
         .map_err(|source| database("begin request", source))?;
     let inserted = sqlx::query(
-        "INSERT INTO business_approval_requests(request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,'pending',1,$8,$9) ON CONFLICT DO NOTHING RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at",
+        "INSERT INTO business_approval_requests(request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,intent_digest) VALUES($1,$2,$3,$4,$5,$6,$7,'pending',1,$8,$9,$10) ON CONFLICT DO NOTHING RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at,intent_digest",
     )
     .bind(&intent.request_id)
     .bind(&intent.requester_instance)
@@ -124,6 +126,7 @@ pub(crate) async fn request(
     .bind(&intent.subject_id)
     .bind(intent.requested_at)
     .bind(intent.expires_at)
+    .bind(&intent.intent_digest)
     .fetch_optional(&mut *transaction)
     .await
     .map_err(|source| database("create approval request", source))?;
@@ -138,7 +141,7 @@ pub(crate) async fn request(
     }
 
     let rows = sqlx::query(
-        "SELECT request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at FROM business_approval_requests WHERE (requester_instance=$1 AND idempotency_key=$2) OR request_id=$3 FOR UPDATE",
+        "SELECT request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at,intent_digest FROM business_approval_requests WHERE (requester_instance=$1 AND idempotency_key=$2) OR request_id=$3 FOR UPDATE",
     )
     .bind(&intent.requester_instance)
     .bind(&intent.idempotency_key)
@@ -170,7 +173,7 @@ pub(crate) async fn read(
     requester_constraint: Option<&str>,
 ) -> Result<Option<StoredApproval>, StorageError> {
     let row = sqlx::query(
-        "SELECT request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at FROM business_approval_requests WHERE request_id=$1 AND ($2::text IS NULL OR requester_instance=$2)",
+        "SELECT request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at,intent_digest FROM business_approval_requests WHERE request_id=$1 AND ($2::text IS NULL OR requester_instance=$2)",
     )
     .bind(request_id)
     .bind(requester_constraint)
@@ -201,7 +204,7 @@ pub(crate) async fn decide(
         return Ok(Err(DomainFailure::AlreadyTerminal));
     }
     let approval = sqlx::query(
-        "UPDATE business_approval_requests SET status=$2,revision=revision+1,terminal_caller_instance=$3,terminal_actor=$4,evidence_ref=$5,reason=$6,terminal_at=transaction_timestamp() WHERE request_id=$1 RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at",
+        "UPDATE business_approval_requests SET status=$2,revision=revision+1,terminal_caller_instance=$3,terminal_actor=$4,evidence_ref=$5,reason=$6,terminal_at=transaction_timestamp() WHERE request_id=$1 RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at,intent_digest",
     )
     .bind(request_id)
     .bind(decision.as_str())
@@ -235,7 +238,7 @@ pub(crate) async fn cancel(
         return Ok(Err(DomainFailure::AlreadyTerminal));
     }
     let approval = sqlx::query(
-        "UPDATE business_approval_requests SET status='cancelled',revision=revision+1,terminal_caller_instance=$2,terminal_actor=$3,evidence_ref=NULL,reason=$4,terminal_at=transaction_timestamp() WHERE request_id=$1 RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at",
+        "UPDATE business_approval_requests SET status='cancelled',revision=revision+1,terminal_caller_instance=$2,terminal_actor=$3,evidence_ref=NULL,reason=$4,terminal_at=transaction_timestamp() WHERE request_id=$1 RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at,intent_digest",
     )
     .bind(request_id)
     .bind(caller)
@@ -272,7 +275,7 @@ pub(crate) async fn expire(
         return Ok(Err(DomainFailure::NotDue));
     }
     let approval = sqlx::query(
-        "UPDATE business_approval_requests SET status='expired',revision=revision+1,terminal_caller_instance=$2,terminal_actor=NULL,evidence_ref=NULL,reason=NULL,terminal_at=transaction_timestamp() WHERE request_id=$1 RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at",
+        "UPDATE business_approval_requests SET status='expired',revision=revision+1,terminal_caller_instance=$2,terminal_actor=NULL,evidence_ref=NULL,reason=NULL,terminal_at=transaction_timestamp() WHERE request_id=$1 RETURNING request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at,intent_digest",
     )
     .bind(request_id)
     .bind(caller)
@@ -300,7 +303,7 @@ async fn lock_request(
     request_id: &str,
 ) -> Result<Option<StoredApproval>, StorageError> {
     let row = sqlx::query(
-        "SELECT request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at FROM business_approval_requests WHERE request_id=$1 FOR UPDATE",
+        "SELECT request_id,requester_instance,idempotency_key,requested_by,approval_kind,subject_kind,subject_id,status,revision,requested_at,expires_at,terminal_caller_instance,terminal_actor,evidence_ref,reason,terminal_at,intent_digest FROM business_approval_requests WHERE request_id=$1 FOR UPDATE",
     )
     .bind(request_id)
     .fetch_optional(&mut **transaction)
@@ -324,6 +327,7 @@ fn decode_approval(row: &PgRow) -> Result<StoredApproval, StorageError> {
         approval_kind: value(row, "approval_kind", "decode approval kind")?,
         subject_kind: value(row, "subject_kind", "decode subject kind")?,
         subject_id: value(row, "subject_id", "decode subject ID")?,
+        intent_digest: value(row, "intent_digest", "decode intent digest")?,
         status,
         revision,
         requested_at: value(row, "requested_at", "decode request timestamp")?,
@@ -386,6 +390,7 @@ fn same_intent(approval: &StoredApproval, intent: &RequestIntent) -> bool {
         && approval.approval_kind == intent.approval_kind
         && approval.subject_kind == intent.subject_kind
         && approval.subject_id == intent.subject_id
+        && approval.intent_digest == intent.intent_digest
         && approval.expires_at == intent.expires_at
 }
 
