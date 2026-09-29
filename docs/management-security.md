@@ -26,6 +26,11 @@ Existing pending-only CAS, decision-time expiry and requester isolation remain
 unchanged. Native PostgreSQL is validated. Workers PG/Hyperdrive or authenticated
 remote approval topology require separate qualification.
 
+Caller allowlists accept a legacy single Instance key or the canonical
+`plugin-id/instance-key` form. Both remain exact matches: allowing one canonical
+Instance grants no authority to the package name or another Instance. Empty
+segments and paths with more than two segments are rejected by configuration.
+
 ## Verification
 
 ```sh

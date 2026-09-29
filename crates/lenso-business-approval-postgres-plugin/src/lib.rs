@@ -621,7 +621,11 @@ fn valid_idempotency_key(value: &str) -> bool {
 }
 
 fn valid_instance(value: &str) -> bool {
-    valid_identifier(value, 256)
+    value.len() <= 256
+        && (1..=2).contains(&value.split('/').count())
+        && value
+            .split('/')
+            .all(|segment| valid_identifier(segment, 256))
 }
 
 fn valid_kind(value: &str) -> bool {
@@ -751,6 +755,34 @@ mod tests {
                 CallerListError::DuplicateInstance
             ))
         );
+    }
+
+    #[test]
+    fn canonical_instance_callers_retain_exact_authority() {
+        let mut policy = config();
+        policy.requester_instances = vec!["lenso.management/main".into()];
+        policy.decider_instances = policy.requester_instances.clone();
+        policy.expiration_executor_instances = policy.requester_instances.clone();
+        policy.validate().unwrap();
+        assert!(policy.can_request("lenso.management/main"));
+        assert!(policy.can_decide("lenso.management/main"));
+        assert!(!policy.can_request("lenso.management"));
+        assert!(!policy.can_decide("lenso.management/other"));
+        for invalid in [
+            "",
+            "/main",
+            "lenso.management/",
+            "lenso.management//main",
+            "lenso.management/main/other",
+        ] {
+            policy.requester_instances = vec![invalid.into()];
+            assert_eq!(
+                policy.validate(),
+                Err(BusinessApprovalConfigError::InvalidRequesters(
+                    CallerListError::InvalidInstance
+                ))
+            );
+        }
     }
 
     #[test]
