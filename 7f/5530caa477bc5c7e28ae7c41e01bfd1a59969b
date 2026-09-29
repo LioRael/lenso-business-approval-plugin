@@ -1,0 +1,27 @@
+docs/management-security.md
+  s_f4202e28c6b5b1::t_ef84cbbaab7983 34-41
+crates/lenso-business-approval-postgres-plugin/Cargo.toml
+  s_f4202e28c6b5b1::t_ef84cbbaab7983 20
+Cargo.lock
+  s_f4202e28c6b5b1::t_c222d7bfe2f987 5-13,195-221,227-229,270-297,349-354,738-752,760,776-791,818-852,1161-1209,1224-1232,1286-1310,1317-1322,1353-1363,1426-1431
+crates/lenso-business-approval-postgres-plugin/src/lib.rs
+  s_f4202e28c6b5b1::t_97f6d45324dcc3 240-242
+crates/lenso-business-approval-postgres-plugin/src/postgres_tests.rs
+  s_f4202e28c6b5b1::t_a729bedad28164 254-391
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7f5530caa477bc5c7e28ae7c41e01bfd1a59969b",
+  "prompts": {},
+  "sessions": {
+    "s_f4202e28c6b5b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ee9e-623b-7d12-a648-d8b462390eec",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "LioRael <leo@lenso.dev>"
+    }
+  }
+}
