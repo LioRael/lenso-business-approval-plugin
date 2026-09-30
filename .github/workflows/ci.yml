@@ -41,6 +41,8 @@ jobs:
           lenso-contract-codegen
       - run: lenso-contract-codegen workspace check --manifest-path Cargo.toml
       - run: ./scripts/check-repository-boundary.sh
+      - name: Verify private package policy
+        run: python3 scripts/check-package-policy.py
       - run: cargo fmt --all -- --check
       - run: cargo check --locked --workspace --all-targets
       - run: cargo test --locked --workspace --features postgres-acceptance

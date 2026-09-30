@@ -67,3 +67,22 @@ LENSO_BUSINESS_APPROVAL_TEST_DATABASE_URL=postgres://... \
 This is not a workflow engine. It does not execute callbacks, scripts, forms,
 arbitrary payload-defined steps, routing graphs, notifications, or post-decision
 business actions.
+
+## Source delivery and package policy
+
+Every workspace package is private (`publish = false`). Candidate CI validates
+source and the existing backend checks before exact-SHA landing. A push to
+`main` does not publish packages, create release tags or open a release PR.
+
+The manual **Source package policy** workflow reads the selected source,
+checks the repository boundary and verifies that each package remains private.
+It has read-only repository permission and does not run a publisher. Run the
+same package-policy check locally with Python 3.11 or newer:
+
+```sh
+python3 scripts/check-package-policy.py
+```
+
+Any later registry publication requires a separately reviewed public-package
+policy, satisfied producer/archive prerequisites and explicit authorization.
+Source checks and landing do not supply that authorization.
