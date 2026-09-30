@@ -1,0 +1,27 @@
+.github/workflows/ci.yml
+  s_f4202e28c6b5b1::t_1064a11886b992 39-40
+Cargo.lock
+  s_f4202e28c6b5b1::t_1a8ec473e26c6a 732-733,746,756,823,864-865,874-875,884-886,898,908-909,928-929,943-944,957,972-973,2304-2308
+Cargo.toml
+  s_f4202e28c6b5b1::t_363947e653e36c 19,23-24,48-58
+crates/lenso-business-approval-core/Cargo.toml
+  s_f4202e28c6b5b1::t_5129788bfacfa9 11
+crates/lenso-business-approval-postgres-plugin/Cargo.toml
+  s_f4202e28c6b5b1::t_42c3934fda0152 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a6e73aa756c45db8260b5a7544328d97624ea896",
+  "prompts": {},
+  "sessions": {
+    "s_f4202e28c6b5b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ee9e-623b-7d12-a648-d8b462390eec",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "LioRael <leo@lenso.dev>"
+    }
+  }
+}
