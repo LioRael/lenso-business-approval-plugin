@@ -739,6 +739,63 @@ mod tests {
     }
 
     #[test]
+    fn configuration_schema_resolves_and_owner_formats_remain_strict() {
+        use lenso_app_plan::{
+            CapabilityEndpointPlan,
+            authoring::{
+                HostBinding, HostCatalog, HostDefaultPlugin, HostPluginRelease, HostSlot,
+                PluginDescriptor, PluginInstanceId, PluginRootSnapshot, resolve_plugin_root,
+            },
+        };
+
+        let descriptor = serde_json::from_str(PLUGIN_DESCRIPTOR_JSON).unwrap();
+        let secrets_provider = PluginDescriptor::new("test.secrets", "0.1.0", "secrets")
+            .with_capability(CapabilityEndpointPlan::new(
+                secrets::CAPABILITY_ID,
+                secrets::DESCRIPTOR_VERSION,
+                ["resolve"],
+            ));
+        let host = HostCatalog::new(
+            [HostSlot::one("business-approval"), HostSlot::one("secrets")],
+            [
+                HostPluginRelease::new(descriptor),
+                HostPluginRelease::new(secrets_provider),
+            ],
+            [
+                HostDefaultPlugin::new(PACKAGE_ID, "default")
+                    .with_configuration(serde_json::to_value(config()).unwrap()),
+                HostDefaultPlugin::new("test.secrets", "default"),
+            ],
+        )
+        .with_bindings([HostBinding::to_instance(
+            PluginInstanceId::new(PACKAGE_ID, "default"),
+            secrets::CAPABILITY_ID,
+            PluginInstanceId::new("test.secrets", "default"),
+        )]);
+        resolve_plugin_root(&host, &PluginRootSnapshot::default()).unwrap();
+        validate_config(&config()).unwrap();
+
+        for (field, value) in [
+            ("schema", serde_json::json!("bad;schema")),
+            ("database_url_secret", serde_json::json!("../database")),
+            (
+                "requester_instances",
+                serde_json::json!(["lenso.management/default/other"]),
+            ),
+            ("decider_instances", serde_json::json!(["/default"])),
+            (
+                "expiration_executor_instances",
+                serde_json::json!(["invalid caller"]),
+            ),
+        ] {
+            let mut encoded = serde_json::to_value(config()).unwrap();
+            encoded[field] = value;
+            let invalid = serde_json::from_value(encoded).unwrap();
+            assert!(validate_config(&invalid).is_err(), "{field}");
+        }
+    }
+
+    #[test]
     fn config_rejects_missing_or_duplicate_exact_callers() {
         let mut invalid = config();
         invalid.requester_instances.clear();

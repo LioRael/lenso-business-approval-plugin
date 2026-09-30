@@ -13,20 +13,15 @@
   "properties": {
     "schema": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9_]{0,62}$"
+      "minLength": 1,
+      "maxLength": 63
     },
     "database_url_secret": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 256,
-      "pattern": "^[A-Za-z0-9._:-]+(?:/[A-Za-z0-9._:-]+)*$"
+      "maxLength": 256
     },
-    "requester_instances": {"$ref": "#/$defs/callers"},
-    "decider_instances": {"$ref": "#/$defs/callers"},
-    "expiration_executor_instances": {"$ref": "#/$defs/callers"}
-  },
-  "$defs": {
-    "callers": {
+    "requester_instances": {
       "type": "array",
       "minItems": 1,
       "maxItems": 64,
@@ -34,8 +29,29 @@
       "items": {
         "type": "string",
         "minLength": 1,
-        "maxLength": 256,
-        "pattern": "^[A-Za-z0-9._:-]+(?:/[A-Za-z0-9._:-]+)?$"
+        "maxLength": 256
+      }
+    },
+    "decider_instances": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      }
+    },
+    "expiration_executor_instances": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
       }
     }
   }
