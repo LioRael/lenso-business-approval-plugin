@@ -36,7 +36,8 @@ jobs:
       - name: Install exact contract projection checker
         run: >-
           cargo install --locked
-          --version '=0.10.0'
+          --git https://github.com/LioRael/lenso
+          --rev f670422953b42cc33b83a9b8cde9a4c74e9f6ceb
           lenso-contract-codegen
       - run: lenso-contract-codegen workspace check --manifest-path Cargo.toml
       - run: ./scripts/check-repository-boundary.sh

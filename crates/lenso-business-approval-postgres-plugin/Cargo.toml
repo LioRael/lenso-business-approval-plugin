@@ -18,7 +18,7 @@ postgres-acceptance = []
 
 [dependencies]
 lenso-business-approval-core={path="../lenso-business-approval-core",version="0.1.0"}
-lenso-auth-sdk = { version = "0.2.4", git = "https://github.com/LioRael/lenso-auth-plugin", rev = "5fb16bbcbff51cce394fd6e29df9079485f7f37e" }
+lenso-auth-sdk = { version = "0.2.4", git = "https://github.com/LioRael/lenso-auth-plugin", rev = "1d101fbc9ba1efc12aaa2cf459628e6383100264" }
 lenso.workspace = true
 lenso-capability-business-approval = { version = "0.1.0", path = "../lenso-capability-business-approval" }
 lenso-capability-secrets.workspace = true
