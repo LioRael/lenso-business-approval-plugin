@@ -1,0 +1,29 @@
+[package]
+name = "lenso-business-approval-d1-plugin"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+[package.metadata.lenso]
+plugin-id = "lenso.business-approval.d1"
+root-slot = "business-approval"
+[package.metadata.lenso.host-facilities.store]
+native = "host_facilities::store"
+workers = "host_facilities::store"
+workers-adapter = "src/host_facilities/store.mjs"
+[dependencies]
+lenso.workspace = true
+lenso-business-approval-core = {path="../lenso-business-approval-core",version="0.1.0"}
+lenso-capability-business-approval = {path="../lenso-capability-business-approval",version="0.1.0"}
+serde.workspace = true
+serde_json.workspace = true
+time.workspace = true
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "=0.2.127"
+wasm-bindgen-futures = "=0.4.77"
+js-sys = "=0.3.104"
+serde-wasm-bindgen = "0.6"
+[lints]
+workspace = true

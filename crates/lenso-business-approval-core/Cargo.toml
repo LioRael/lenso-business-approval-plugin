@@ -1,0 +1,17 @@
+[package]
+name = "lenso-business-approval-core"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+[dependencies]
+lenso.workspace = true
+lenso-auth-sdk = { version = "0.2.4", git = "https://github.com/LioRael/lenso-auth-plugin", rev = "5fb16bbcbff51cce394fd6e29df9079485f7f37e" }
+lenso-capability-business-approval = {path="../lenso-capability-business-approval",version="0.1.0"}
+serde.workspace = true
+thiserror.workspace = true
+time.workspace = true
+[lints]
+workspace = true

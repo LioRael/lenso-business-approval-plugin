@@ -31,6 +31,7 @@ jobs:
         with:
           toolchain: 1.94.0
           components: rustfmt,clippy
+          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
       - name: Install exact contract projection checker
         run: >-
@@ -43,3 +44,10 @@ jobs:
       - run: cargo check --locked --workspace --all-targets
       - run: cargo test --locked --workspace --features postgres-acceptance
       - run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+      - name: Check D1 implementation portability
+        run: cargo clippy --locked -p lenso-business-approval-d1-plugin --target wasm32-unknown-unknown -- -D warnings
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify finite D1 store semantics
+        run: node --test crates/lenso-business-approval-d1-plugin/tests/d1-store.test.mjs

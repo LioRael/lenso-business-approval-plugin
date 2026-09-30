@@ -66,6 +66,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bumpalo"
+version = "3.20.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
+
+[[package]]
 name = "byteorder"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -711,10 +717,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
+name = "js-sys"
+version = "0.3.104"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e0c1080212aad755ea003d18543e8768dd432c48819efd73a7bf1e39b7a5a3a"
+dependencies = [
+ "cfg-if",
+ "futures-util",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "lenso"
 version = "0.5.27"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46620d37d1c40f62f33f26b28a209fbcbffb2dd9cbefb5e5ab269ce964c52876"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "futures",
  "lenso-kernel",
@@ -727,8 +743,7 @@ dependencies = [
 [[package]]
 name = "lenso-app-plan"
 version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fa1393e57d198ae68a8f5c4bb5a16d4eaa2267116be8de34e920a55fcf28c7e"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "serde",
  "serde_json",
@@ -738,7 +753,7 @@ dependencies = [
 [[package]]
 name = "lenso-auth-sdk"
 version = "0.2.4"
-source = "git+https://github.com/LioRael/lenso-auth-plugin?rev=be751f795b254ab228ae4fb2fde7cf79a934d09b#be751f795b254ab228ae4fb2fde7cf79a934d09b"
+source = "git+https://github.com/LioRael/lenso-auth-plugin?rev=5fb16bbcbff51cce394fd6e29df9079485f7f37e#5fb16bbcbff51cce394fd6e29df9079485f7f37e"
 dependencies = [
  "base64",
  "ed25519-dalek",
@@ -751,6 +766,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "lenso-business-approval-core"
+version = "0.1.0"
+dependencies = [
+ "lenso",
+ "lenso-auth-sdk",
+ "lenso-capability-business-approval",
+ "serde",
+ "thiserror",
+ "time",
+]
+
+[[package]]
+name = "lenso-business-approval-d1-plugin"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "lenso",
+ "lenso-business-approval-core",
+ "lenso-capability-business-approval",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "time",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
 name = "lenso-business-approval-postgres-plugin"
 version = "0.1.0"
 dependencies = [
@@ -758,6 +801,7 @@ dependencies = [
  "lenso",
  "lenso-app-plan",
  "lenso-auth-sdk",
+ "lenso-business-approval-core",
  "lenso-capability-business-approval",
  "lenso-capability-secrets",
  "lenso-kernel",
@@ -776,7 +820,7 @@ dependencies = [
 [[package]]
 name = "lenso-capability-auth"
 version = "0.2.0"
-source = "git+https://github.com/LioRael/lenso-auth-plugin?rev=be751f795b254ab228ae4fb2fde7cf79a934d09b#be751f795b254ab228ae4fb2fde7cf79a934d09b"
+source = "git+https://github.com/LioRael/lenso-auth-plugin?rev=5fb16bbcbff51cce394fd6e29df9079485f7f37e#5fb16bbcbff51cce394fd6e29df9079485f7f37e"
 dependencies = [
  "futures",
  "lenso-contract-authoring",
@@ -818,8 +862,7 @@ dependencies = [
 [[package]]
 name = "lenso-contract-authoring"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ec01f1454a3df57b67ce2403f0d3037ed7f8612a0837946a871fac0271738bc"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "lenso-contract-authoring-macros",
  "schemars",
@@ -829,8 +872,7 @@ dependencies = [
 [[package]]
 name = "lenso-contract-authoring-macros"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33c892d3c036ec192859b90ff83f5c3c02b4a09f89fd385f7aedb8f8bc2a08a8"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -840,8 +882,7 @@ dependencies = [
 [[package]]
 name = "lenso-contract-codegen"
 version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc88556667bb6bb3d9b96402085448891699d0760ded6adc65a8e320d63230d8"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "lenso-contract-authoring",
  "regex",
@@ -853,8 +894,7 @@ dependencies = [
 [[package]]
 name = "lenso-contract-runtime"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06ac2408c27d47541e1378dc837f239e20bb5e119445fcd73f8c2fce55700206"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "base64",
  "bytes",
@@ -865,8 +905,7 @@ dependencies = [
 [[package]]
 name = "lenso-kernel"
 version = "0.3.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b2c97d966a136e9e56a4fc0865d617a7cea7265bb1df4ba69ee739b8159c677"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "futures",
  "lenso-app-plan",
@@ -886,8 +925,7 @@ dependencies = [
 [[package]]
 name = "lenso-native-adapter"
 version = "0.3.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a74e740da05247c1e099883ff5b174f5761d8e21883641967b03793756238b1e"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "futures",
  "inventory",
@@ -902,8 +940,7 @@ dependencies = [
 [[package]]
 name = "lenso-native-adapter-macros"
 version = "0.2.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00048fb5e9732dbfc01547f50cfdfc8129ce647fa7d523c7b7d6ad1d1980cdac"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -916,8 +953,7 @@ dependencies = [
 [[package]]
 name = "lenso-plugin-authoring"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f24f444677f5b9857d4aa6f2ca90002243eb756a7f153bb721206f88abe6b07"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 
 [[package]]
 name = "lenso-postgres-kit"
@@ -933,8 +969,7 @@ dependencies = [
 [[package]]
 name = "lenso-runtime-codec"
 version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "445375a6bf8a20f9cc7798e2bbe1414f6fcc711781c31435ea8498ef24d18834"
+source = "git+https://github.com/LioRael/lenso?rev=c0464691b6ae1c80b5606065dd4073e8b7d6a59e#c0464691b6ae1c80b5606065dd4073e8b7d6a59e"
 dependencies = [
  "futures",
  "hex",
@@ -1328,6 +1363,17 @@ checksum = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
 dependencies = [
  "serde_core",
  "serde_derive",
+]
+
+[[package]]
+name = "serde-wasm-bindgen"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8302e169f0eddcc139c70f139d19d6467353af16f9fce27e8c30158036a1e16b"
+dependencies = [
+ "js-sys",
+ "serde",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1986,6 +2032,61 @@ name = "wasi"
 version = "0.11.1+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
+
+[[package]]
+name = "wasm-bindgen"
+version = "0.2.127"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b70935747edd64d89de3efa29d73789b806c15798f8e7dca4d8ac356b50ce70"
+dependencies = [
+ "cfg-if",
+ "once_cell",
+ "rustversion",
+ "wasm-bindgen-macro",
+ "wasm-bindgen-shared",
+]
+
+[[package]]
+name = "wasm-bindgen-futures"
+version = "0.4.77"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b7777d5cc23d0e91404e53ce2d5e8ec7acae3026b16233dba62cd3246457950"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "wasm-bindgen-macro"
+version = "0.2.127"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77775f8f3f7217702089053b94958f8f54061a3f663417df76e19cbdcca29bc1"
+dependencies = [
+ "quote",
+ "wasm-bindgen-macro-support",
+]
+
+[[package]]
+name = "wasm-bindgen-macro-support"
+version = "0.2.127"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e11d33f857dc2fb11b8bc75aee111aa9cbeb12cd9f25efd3d4c2a3dd4e235284"
+dependencies = [
+ "bumpalo",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+ "wasm-bindgen-shared",
+]
+
+[[package]]
+name = "wasm-bindgen-shared"
+version = "0.2.127"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ef64dbcc55df09c7e5a46182d181c2cfa3e925f3da937ea764728b4bbb9dcbf"
+dependencies = [
+ "unicode-ident",
+]
 
 [[package]]
 name = "webpki-roots"

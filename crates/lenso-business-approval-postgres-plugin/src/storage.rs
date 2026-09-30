@@ -1,91 +1,10 @@
 use lenso_postgres_kit::OwnedPostgres;
 use sqlx::{Postgres, Row, Transaction, postgres::PgRow};
 use thiserror::Error;
-use time::OffsetDateTime;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum ApprovalStatus {
-    Pending,
-    Approved,
-    Rejected,
-    Cancelled,
-    Expired,
-}
-
-impl ApprovalStatus {
-    pub(crate) const fn as_str(self) -> &'static str {
-        match self {
-            Self::Pending => "pending",
-            Self::Approved => "approved",
-            Self::Rejected => "rejected",
-            Self::Cancelled => "cancelled",
-            Self::Expired => "expired",
-        }
-    }
-
-    fn parse(value: &str) -> Result<Self, StorageError> {
-        match value {
-            "pending" => Ok(Self::Pending),
-            "approved" => Ok(Self::Approved),
-            "rejected" => Ok(Self::Rejected),
-            "cancelled" => Ok(Self::Cancelled),
-            "expired" => Ok(Self::Expired),
-            _ => Err(StorageError::InvalidStatus {
-                status: value.to_owned(),
-            }),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct RequestIntent {
-    pub(crate) request_id: String,
-    pub(crate) requester_instance: String,
-    pub(crate) idempotency_key: String,
-    pub(crate) requested_by: String,
-    pub(crate) approval_kind: String,
-    pub(crate) subject_kind: String,
-    pub(crate) subject_id: String,
-    pub(crate) intent_digest: Option<String>,
-    pub(crate) requested_at: OffsetDateTime,
-    pub(crate) expires_at: OffsetDateTime,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct StoredApproval {
-    pub(crate) request_id: String,
-    pub(crate) requester_instance: String,
-    pub(crate) idempotency_key: String,
-    pub(crate) requested_by: String,
-    pub(crate) approval_kind: String,
-    pub(crate) subject_kind: String,
-    pub(crate) subject_id: String,
-    pub(crate) intent_digest: Option<String>,
-    pub(crate) status: ApprovalStatus,
-    pub(crate) revision: i64,
-    pub(crate) requested_at: OffsetDateTime,
-    pub(crate) expires_at: OffsetDateTime,
-    pub(crate) terminal_caller_instance: Option<String>,
-    pub(crate) terminal_actor: Option<String>,
-    pub(crate) evidence_ref: Option<String>,
-    pub(crate) reason: Option<String>,
-    pub(crate) terminal_at: Option<OffsetDateTime>,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct RequestOutcome {
-    pub(crate) created: bool,
-    pub(crate) approval: StoredApproval,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum DomainFailure {
-    IdempotencyConflict,
-    RequestNotFound,
-    AlreadyTerminal,
-    NotRequester,
-    NotDue,
-}
+pub(crate) use lenso_business_approval_core::model::{
+    ApprovalStatus, DomainFailure, RequestIntent, RequestOutcome, StoredApproval, same_intent,
+};
 
 #[derive(Debug, Error)]
 pub(crate) enum StorageError {
@@ -314,7 +233,9 @@ async fn lock_request(
 
 fn decode_approval(row: &PgRow) -> Result<StoredApproval, StorageError> {
     let status_text: String = value(row, "status", "decode status")?;
-    let status = ApprovalStatus::parse(&status_text)?;
+    let status = ApprovalStatus::parse(&status_text).map_err(|_| StorageError::InvalidStatus {
+        status: status_text.clone(),
+    })?;
     let revision: i64 = value(row, "revision", "decode revision")?;
     if revision < 1 {
         return Err(StorageError::InvalidRevision);
@@ -343,55 +264,8 @@ fn decode_approval(row: &PgRow) -> Result<StoredApproval, StorageError> {
 }
 
 fn validate_evidence(approval: &StoredApproval) -> Result<(), StorageError> {
-    let valid = match approval.status {
-        ApprovalStatus::Pending => {
-            approval.revision == 1
-                && approval.terminal_caller_instance.is_none()
-                && approval.terminal_actor.is_none()
-                && approval.evidence_ref.is_none()
-                && approval.reason.is_none()
-                && approval.terminal_at.is_none()
-        }
-        ApprovalStatus::Approved | ApprovalStatus::Rejected => {
-            approval.revision == 2
-                && approval.terminal_caller_instance.is_some()
-                && approval.terminal_actor.is_some()
-                && approval.evidence_ref.is_some()
-                && approval.terminal_at.is_some()
-        }
-        ApprovalStatus::Cancelled => {
-            approval.revision == 2
-                && approval.terminal_caller_instance.is_some()
-                && approval.terminal_actor.is_some()
-                && approval.evidence_ref.is_none()
-                && approval.terminal_at.is_some()
-        }
-        ApprovalStatus::Expired => {
-            approval.revision == 2
-                && approval.terminal_caller_instance.is_some()
-                && approval.terminal_actor.is_none()
-                && approval.evidence_ref.is_none()
-                && approval.reason.is_none()
-                && approval.terminal_at.is_some()
-        }
-    };
-    if valid {
-        Ok(())
-    } else {
-        Err(StorageError::InvalidEvidence)
-    }
-}
-
-fn same_intent(approval: &StoredApproval, intent: &RequestIntent) -> bool {
-    approval.request_id == intent.request_id
-        && approval.requester_instance == intent.requester_instance
-        && approval.idempotency_key == intent.idempotency_key
-        && approval.requested_by == intent.requested_by
-        && approval.approval_kind == intent.approval_kind
-        && approval.subject_kind == intent.subject_kind
-        && approval.subject_id == intent.subject_id
-        && approval.intent_digest == intent.intent_digest
-        && approval.expires_at == intent.expires_at
+    lenso_business_approval_core::model::validate_evidence(approval)
+        .map_err(|_| StorageError::InvalidEvidence)
 }
 
 fn value<T>(row: &PgRow, column: &'static str, operation: &'static str) -> Result<T, StorageError>
