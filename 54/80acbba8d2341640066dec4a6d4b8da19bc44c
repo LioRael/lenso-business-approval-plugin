@@ -1,0 +1,20 @@
+Cargo.lock
+  h_9d56aba080c170 732-734,747-748,758,825,867-868,878-879,902-903,914-915,934-936,950-952,965-966,982-983
+Cargo.toml
+  h_9d56aba080c170 19,24
+crates/lenso-business-approval-core/Cargo.toml
+  h_9d56aba080c170 11
+crates/lenso-business-approval-postgres-plugin/Cargo.toml
+  h_9d56aba080c170 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5480acbba8d2341640066dec4a6d4b8da19bc44c",
+  "prompts": {},
+  "humans": {
+    "h_9d56aba080c170": {
+      "author": "LioRael <leo@lenso.dev>"
+    }
+  }
+}
